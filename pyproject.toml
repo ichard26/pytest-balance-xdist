@@ -35,3 +35,10 @@ dynamic = { version = { attr = "pytest_balance_xdist.__version__" } }
 
 [project.entry-points]
 pytest11 = { balanced-xdist = "pytest_balance_xdist" }
+
+[tool.black]
+line-length = 95
+
+[tool.isort]
+profile = "black"
+known_third_party = ["pytest", "xdist"]

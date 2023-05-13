@@ -1,7 +1,8 @@
 # pytest-balance-xdist
 
-A forked version of the `balance_xdist_plugin.py` [Ned Batchelder uses to speed
-up the coverage.py test suite][blog-post], packaged for general use.
+A forked version of the `balance_xdist_plugin.py`
+[Ned Batchelder uses to speed up the coverage.py test suite][blog-post], packaged for
+general use.
 
 ## License
 

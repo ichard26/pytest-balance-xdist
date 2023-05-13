@@ -6,7 +6,6 @@ import csv
 import os
 import shutil
 import time
-
 from pathlib import Path
 
 import pytest
@@ -24,6 +23,7 @@ def pytest_addoption(parser):
         help="Test substrings to assign to the same worker",
     )
 
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_configure(config):
     """Registers our pytest plugin."""
@@ -35,7 +35,7 @@ class BalanceXdistPlugin:
 
     def __init__(self, config):
         self.config = config
-        self.running_all = (self.config.getoption("-k") == "")
+        self.running_all = self.config.getoption("-k") == ""
         self.times = collections.defaultdict(float)
         self.worker = os.environ.get("PYTEST_XDIST_WORKER", "none")
         self.tests_csv = None
@@ -48,14 +48,13 @@ class BalanceXdistPlugin:
         tests_csv_dir = session.startpath.resolve() / "tmp/tests_csv"
         self.tests_csv = tests_csv_dir / f"{self.worker}.csv"
 
-        if self.worker == "none":
-            if tests_csv_dir.exists():
-                for csv_file in tests_csv_dir.iterdir():
-                    with csv_file.open(newline="") as fcsv:
-                        reader = csv.reader(fcsv)
-                        for row in reader:
-                            self.times[row[1]] += float(row[3])
-                shutil.rmtree(tests_csv_dir)
+        if self.worker == "none" and tests_csv_dir.exists():
+            for csv_file in tests_csv_dir.iterdir():
+                with csv_file.open(newline="") as fcsv:
+                    reader = csv.reader(fcsv)
+                    for row in reader:
+                        self.times[row[1]] += float(row[3])
+            shutil.rmtree(tests_csv_dir)
 
     def write_duration_row(self, item, phase, duration):
         """Helper to write a row to the tracked-test csv file."""
@@ -97,7 +96,7 @@ class BalanceXdistPlugin:
         clumped = set()
         clumps = config.getini("balanced_clumps")
         for i, clump_word in enumerate(clumps):
-            clump_nodes = set(nodeid for nodeid in self.times.keys() if clump_word in nodeid)
+            clump_nodes = {nodeid for nodeid in self.times.keys() if clump_word in nodeid}
             i %= nchunks
             tests[i].update(clump_nodes)
             totals[i] += sum(self.times[nodeid] for nodeid in clump_nodes)
@@ -119,8 +118,9 @@ class BalanceXdistPlugin:
         return BalancedScheduler(config, log, clumps, test_chunks)
 
 
-class BalancedScheduler(xdist.scheduler.LoadScopeScheduling):   # pylint: disable=abstract-method # pragma: debugging
+class BalancedScheduler(xdist.scheduler.LoadScopeScheduling):
     """A balanced-chunk test scheduler for pytest-xdist."""
+
     def __init__(self, config, log, clumps, test_chunks):
         super().__init__(config, log)
         self.clumps = clumps
@@ -144,7 +144,7 @@ class BalancedScheduler(xdist.scheduler.LoadScopeScheduling):   # pylint: disabl
 
 # Run this with:
 #   python -c "from tests.balance_xdist_plugin import show_worker_times as f; f()"
-def show_worker_times():                            # pragma: debugging
+def show_worker_times():
     """Ad-hoc utility to show data from the last tracked-test run."""
     times = collections.defaultdict(float)
     tests = collections.defaultdict(int)
