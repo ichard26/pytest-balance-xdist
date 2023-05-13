@@ -33,8 +33,11 @@ GitHub = "https://github.com/ichard26/pytest-balance-xdist"
 [tool.setuptools]
 dynamic = { version = { attr = "pytest_balance_xdist.__version__" } }
 
+[project.scripts]
+balance-xdist-show-worker-times = "pytest_balance_xdist:cli_entrypoint"
+
 [project.entry-points]
-pytest11 = { balanced-xdist = "pytest_balance_xdist" }
+pytest11 = { balance-xdist = "pytest_balance_xdist" }
 
 [tool.black]
 line-length = 95
